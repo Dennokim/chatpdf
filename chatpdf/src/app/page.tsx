@@ -1,3 +1,4 @@
+import { Chat } from "@/components/chat";
 import { ModeToggle } from "@/components/darkmode-taggle";
 import React from "react";
 
@@ -9,7 +10,9 @@ const Home = () => {
         <ModeToggle />
       </div>
       <div className="flex flex-1 py-4">
-        <div className="w-full">{/* <Chat /> */}</div>
+        <div className="w-full">
+          <Chat />
+        </div>
       </div>
     </main>
   );

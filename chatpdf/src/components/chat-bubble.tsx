@@ -14,13 +14,13 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { Message } from "ai/react";
-import ReactMarkdown from "@radix-ui/react-dropdown-menu";
+import ReactMarkdown from "react-markdown";
 import { formattedSourceText } from "@/lib/utils";
 
 //we will map over each line in a text and wrap it inside a span and
 //give each span a unique id and a line break after each line
 const wrappedText = (text: string) => {
-  text.split("\n").map((line, i) => (
+  return text.split("\n").map((line, i) => (
     <span key={i}>
       {line}
       <br />
@@ -75,7 +75,17 @@ export function ChatBubble({
                   <AccordionItem value={`source-${index}`} key={index}>
                     <AccordionTrigger>{`Source ${index + 1}`}</AccordionTrigger>
                     <AccordionContent>
-                      <ReactMarkdown linkTarget="_blank">
+                      <ReactMarkdown
+                        components={{
+                          a: ({ node, ...props }) => (
+                            <a
+                              {...props}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            />
+                          ),
+                        }}
+                      >
                         {formattedSourceText(source)}
                       </ReactMarkdown>
                     </AccordionContent>
