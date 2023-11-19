@@ -12,8 +12,9 @@ export async function getPineconeClient() {
   try {
     await pinecone.createIndex({
       name: "chatpdf",
-      dimension: 1536,
+      dimension: 1536 ,
       metric: "cosine",
+     
     });
     console.log(
       `Waiting for ${env.INDEX_INIT_TIMEOUT} seconds for index initialization to complete...`

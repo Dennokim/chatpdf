@@ -18,7 +18,7 @@ export async function embedAndStoreDocs(
     //we will use the pinecone store and store them
     await PineconeStore.fromDocuments(docs, embedding, {
         pineconeIndex: index,
-        namespace: env.PINECONE_NAME_SPACE,
+        //namespace: env.PINECONE_NAME_SPACE,
         textKey: 'text'
     })
 
