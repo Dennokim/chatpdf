@@ -1,4 +1,4 @@
-import { Pinecone } from "@pinecone-database/pinecone";
+import { Pinecone, PineconeClient } from "@pinecone-database/pinecone";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { env } from "./config";
@@ -25,5 +25,26 @@ export async function embedAndStoreDocs(
   } catch (error) {
     console.error(error);
     throw new Error('failed to load your docs!')
+  }
+}
+
+//create an api that gets and returns a vector store handle to be used as a retriever on langchain.
+export async function getVectorStore(client: Pinecone){
+  try {
+     //we will create a new embedding and pass in the index we created
+     const embedding = new OpenAIEmbeddings();
+     const index = client.index(env.PINECONE_INDEX_NAME);
+
+     //get the instance of the vectorestore from pinecone store
+     const vectorstore = await PineconeStore.fromExistingIndex(embedding, {
+      pineconeIndex: index,
+      textKey: "text",
+      namespace: env.PINECONE_NAME_SPACE
+     });
+
+     return vectorstore;
+  } catch (error) {
+    console.log("error", error);
+    throw new Error("Something went wrong while getting vector store !");
   }
 }
