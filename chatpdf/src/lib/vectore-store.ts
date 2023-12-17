@@ -35,14 +35,14 @@ export async function getVectorStore(client: Pinecone){
      const embedding = new OpenAIEmbeddings();
      const index = client.index(env.PINECONE_INDEX_NAME);
 
-     //get the instance of the vectorestore from pinecone store
-     const vectorstore = await PineconeStore.fromExistingIndex(embedding, {
+     //get the instance of the vectorStore from pinecone store
+     const vectorStore = await PineconeStore.fromExistingIndex(embedding, {
       pineconeIndex: index,
       textKey: "text",
       namespace: env.PINECONE_NAME_SPACE
      });
 
-     return vectorstore;
+     return vectorStore;
   } catch (error) {
     console.log("error", error);
     throw new Error("Something went wrong while getting vector store !");

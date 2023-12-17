@@ -1,15 +1,17 @@
+"use client";
+
 import { Button } from "./ui/button";
 import { ChatBubble } from "./chat-bubble";
 import { Input } from "./ui/input";
 import { Message } from "ai";
+import { useChat } from "ai/react";
+import { initialMessages } from "@/lib/utils";
+import { Spinner } from "./ui/spinner";
 
 export function Chat() {
-  //since we don't have any messages we will use a dummy message
-  const messages: Message[] = [
-    { role: "assistant", content: "hey am your ai", id: "1" },
-    { role: "user", content: "hi am the user", id: "2" },
-  ];
-  const sources = ["i am source 1", "i am source 2"];
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    initialMessages,
+  });
 
   return (
     <div className="rounded-2xl border h-[75vh] flex flex-col justify-between">
@@ -20,18 +22,20 @@ export function Chat() {
             key={id}
             role={role}
             content={content}
-            sources={role != "assistant" ? [] : sources}
+            //sources={role != "assistant" ? [] : sources}
           />
         ))}
       </div>
 
-      <form className="p-4 flex clear-both">
+      <form onSubmit={handleSubmit} className="p-4 flex clear-both">
         <Input
           placeholder="Type here to chat with the AI..."
           className="mr-2"
+          value={input}
+          onChange={handleInputChange}
         />
         <Button type="submit" className="w-24">
-          Ask
+          {isLoading ? <Spinner/> : "Ask"}
         </Button>
       </form>
     </div>

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Message } from "ai";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -15,3 +16,13 @@ export function formattedSourceText(inputText: string) {
 export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// Default UI Message
+export const initialMessages: Message[] = [
+  {
+    role: "assistant",
+    id: "0",
+    content:
+      "Hi! I am your PDF assistant. I am happy to help with your questions about your PDF.",
+  },
+];
