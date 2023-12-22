@@ -26,3 +26,28 @@ export const initialMessages: Message[] = [
       "Hi! I am your PDF assistant. I am happy to help with your questions about your PDF.",
   },
 ];
+
+//scroll function
+export function scrollToBottom(containerRef: React.RefObject<HTMLElement>) {
+  if (containerRef.current) {
+    const lastMessage = containerRef.current.lastElementChild;
+    if (lastMessage) {
+      const scrollOptions: ScrollIntoViewOptions = {
+        behavior: "smooth",
+        block: "end",
+      };
+      lastMessage.scrollIntoView(scrollOptions);
+    }
+  }
+}
+
+// Maps the sources with the right ai-message
+export const getSources = (data: Data[], role: string, index: number) => {
+  if (role === "assistant" && index >= 2 && (index - 2) % 2 === 0) {
+    const sourcesIndex = (index - 2) / 2;
+    if (data[sourcesIndex] && data[sourcesIndex].sources) {
+      return data[sourcesIndex].sources;
+    }
+  }
+  return [];
+};

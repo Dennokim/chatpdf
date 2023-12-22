@@ -5,24 +5,31 @@ import { ChatBubble } from "./chat-bubble";
 import { Input } from "./ui/input";
 import { Message } from "ai";
 import { useChat } from "ai/react";
-import { initialMessages } from "@/lib/utils";
+import {  scrollToBottom, initialMessages, getSources,  } from "@/lib/utils";
 import { Spinner } from "./ui/spinner";
+import { useEffect, useRef } from "react";
 
 export function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    initialMessages,
-  });
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const { messages, input, handleInputChange, handleSubmit, isLoading, data } =
+    useChat({
+      initialMessages,
+    });
+
+  useEffect(() => {
+    setTimeout(() => scrollToBottom(containerRef), 100);
+  }, [messages]);
 
   return (
     <div className="rounded-2xl border h-[75vh] flex flex-col justify-between">
-      <div className="p-6 overflow-auto">
+      <div className="p-6 overflow-auto" ref={containerRef}>
         {/* we will map over each Message in messages taking in its id, role, content from the ChatBubble */}
         {messages.map(({ id, role, content }: Message, index) => (
           <ChatBubble
             key={id}
             role={role}
             content={content}
-            //sources={role != "assistant" ? [] : sources}
+            sources={data?.length ? getSources(data, role, index) : []}
           />
         ))}
       </div>
@@ -35,7 +42,7 @@ export function Chat() {
           onChange={handleInputChange}
         />
         <Button type="submit" className="w-24">
-          {isLoading ? <Spinner/> : "Ask"}
+          {isLoading ? <Spinner /> : "Ask"}
         </Button>
       </form>
     </div>

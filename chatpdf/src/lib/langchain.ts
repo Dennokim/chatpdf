@@ -12,50 +12,63 @@ import { Pinecone } from "@pinecone-database/pinecone";
 
 //create th call chain arg that will have the question and chat history
 type callChainArgs = {
-    question: string;
-    chatHistory: string;
-}
+  question: string;
+  chatHistory: string;
+};
 
 //create the call chain function
-export async function callChain({question, chatHistory}: callChainArgs) {
-    try {
-        //sanitize the question(cleaning it up), get the already created pineconeClient and pass it to the vector store
-        const sanitizedQuestion = question.trim().replaceAll("\n", " ");
-        const pineconeClient = await getPineconeClient();
-        const vectorStore = await getVectorStore(pineconeClient);
-        //use the stream from ai sdk
-        const { stream, handlers } = LangChainStream({
-            experimental_streamData: true,
-          });
-          const data = new experimental_StreamData();
-      
-          const chain = ConversationalRetrievalQAChain.fromLLM(
-            streamingModel,
-            vectorStore.asRetriever(),
-            {
-              qaTemplate: QA_TEMPLATE,//final answer
-              questionGeneratorTemplate: STANDALONE_QUESTION_TEMPLATE,
-              returnSourceDocuments: true, //default 4
-              questionGeneratorChainOptions: {
-                llm: nonStreamingModel,
-              },
-            }
-          );
+export async function callChain({ question, chatHistory }: callChainArgs) {
+  try {
+    //sanitize the question(cleaning it up), get the already created pineconeClient and pass it to the vector store
+    const sanitizedQuestion = question.trim().replaceAll("\n", " ");
+    const pineconeClient = await getPineconeClient();
+    const vectorStore = await getVectorStore(pineconeClient);
+    //use the stream from ai sdk
+    const { stream, handlers } = LangChainStream({
+      experimental_streamData: true,
+    });
+    const data = new experimental_StreamData();
 
-          //call the chain by passing in the question and the history and pass in the handlers gotten from the ai-sdk
-          //when creating the stream.
-          chain.call(
-            {
-                question: sanitizedQuestion,
-                chat_history: chatHistory,
-            },
-            [handlers]
-          )
+    const chain = ConversationalRetrievalQAChain.fromLLM(
+      streamingModel,
+      vectorStore.asRetriever(),
+      {
+        qaTemplate: QA_TEMPLATE, //final answer
+        questionGeneratorTemplate: STANDALONE_QUESTION_TEMPLATE,
+        returnSourceDocuments: true, //default 4
+        questionGeneratorChainOptions: {
+          llm: nonStreamingModel,
+        },
+      }
+    );
 
-          //return the readable stream
-          return new StreamingTextResponse(stream, {}, data);
-    } catch (error) {
-        console.log(error);
-        throw new Error("Call chain method failed to execute successfully!!");
-    }
+    //call the chain by passing in the question and the history and pass in the handlers gotten from the ai-sdk
+    //when creating the stream.
+    chain
+      .call(
+        {
+          question: sanitizedQuestion,
+          chat_history: chatHistory,
+        },
+        [handlers]
+      )
+      .then(async (res) => {
+        const sourceDocuments = res?.sourceDocuments;
+        const firstTwoDocuments = sourceDocuments.slice(0, 2);
+        const pageContents = firstTwoDocuments.map(
+          ({ pageContent }: { pageContent: string }) => pageContent
+        );
+        console.log("already appended ", data);
+        data.append({
+          sources: pageContents,
+        });
+        data.close();
+      });
+
+    //return the readable stream
+    return new StreamingTextResponse(stream, {}, data);
+  } catch (error) {
+    console.log(error);
+    throw new Error("Call chain method failed to execute successfully!!");
+  }
 }
